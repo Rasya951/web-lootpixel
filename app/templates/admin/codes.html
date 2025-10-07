@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Daftar Kode Akses - Loot Pixel{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="admin-header">
+    <h2>🔐 Daftar Kode Akses</h2>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline">⬅️ Kembali ke Dashboard</a>
+  </div>
+  
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Kode</th>
+            <th>Produk ID</th>
+            <th>Status</th>
+            <th>Email</th>
+            <th>Dipakai?</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in codes %}
+          <tr>
+            <td><span class="text-primary" style="font-family: 'Orbitron', sans-serif; letter-spacing: 1px;">{{ c.code }}</span></td>
+            <td>{{ c.product_id }}</td>
+            <td>
+              {% if c.status == 'active' %}
+                <span class="badge badge-success">{{ c.status }}</span>
+              {% elif c.status == 'used' %}
+                <span class="badge badge-warning">{{ c.status }}</span>
+              {% else %}
+                <span class="badge badge-secondary">{{ c.status }}</span>
+              {% endif %}
+            </td>
+            <td>{{ c.user_email or '-' }}</td>
+            <td>{{ c.used_at.strftime('%Y-%m-%d %H:%M') if c.used_at else '-' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

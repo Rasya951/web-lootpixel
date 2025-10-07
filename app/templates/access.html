@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Enter Access Code</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #00f5ff;
+      --secondary: #7c3aed;
+      --accent: #ff006e;
+      --bg-dark: #0a0a0f;
+      --bg-card: rgba(15, 15, 25, 0.8);
+      --text-primary: #ffffff;
+      --text-secondary: #b4b8c5;
+      --gradient-primary: linear-gradient(135deg, #00f5ff 0%, #7c3aed 100%);
+      --shadow-glow: 0 0 20px rgba(0, 245, 255, 0.3);
+      --shadow-hover: 0 12px 40px rgba(0, 245, 255, 0.2);
+      --border-radius: 12px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    canvas#pixel-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -10;
+      pointer-events: none;
+    }
+
+    .access-container {
+      background: var(--bg-card);
+      padding: 2.5rem 2rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-glow);
+      text-align: center;
+      width: 100%;
+      max-width: 480px;
+      animation: slideUp 0.6s ease;
+      z-index: 1;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h2 {
+      font-family: 'Orbitron', monospace;
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+      color: var(--primary);
+      animation: flicker 3s infinite;
+    }
+
+    @keyframes flicker {
+      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+        opacity: 1;
+        text-shadow:
+          0 0 2px #fff,
+          0 0 4px var(--primary),
+          0 0 6px var(--accent),
+          0 0 10px var(--secondary);
+      }
+      20%, 24%, 55% {
+        opacity: 0.8;
+        text-shadow: none;
+      }
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 1rem;
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
+      border-radius: var(--border-radius);
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.05);
+      color: white;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(0, 245, 255, 0.2);
+    }
+
+    .btn {
+      background: var(--gradient-primary);
+      color: white;
+      padding: 1rem;
+      font-weight: bold;
+      border: none;
+      width: 100%;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: 0.3s ease;
+      box-shadow: var(--shadow-glow);
+      animation: glowPulse 2.5s infinite ease-in-out;
+    }
+
+    .btn:hover {
+      transform: scale(1.03);
+      box-shadow: var(--shadow-hover);
+    }
+
+    @keyframes glowPulse {
+      0%, 100% {
+        box-shadow: 0 0 12px rgba(0, 245, 255, 0.3), 0 0 24px rgba(124, 58, 237, 0.2);
+      }
+      50% {
+        box-shadow: 0 0 24px rgba(0, 245, 255, 0.5), 0 0 48px rgba(124, 58, 237, 0.4);
+      }
+    }
+
+    .error {
+      color: #ff3366;
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Canvas for Pixel Stars -->
+  <canvas id="pixel-canvas"></canvas>
+
+  <div class="access-container">
+    <h2> Enter Your Etsy Code</h2>
+    <form method="POST">
+      <input type="text" name="code" placeholder="Your Etsy Code, Paste Here" required>
+      <button type="submit" class="btn">Submit</button>
+    </form>
+    {% if error %}
+      <div class="error">{{ error }}</div>
+    {% endif %}
+  </div>
+
+  <script>
+    const canvas = document.getElementById('pixel-canvas');
+    const ctx = canvas.getContext('2d');
+    let w, h;
+    let pixels = [];
+
+    function resizeCanvas() {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class PixelStar {
+      constructor() {
+        this.reset();
+      }
+
+      reset() {
+        this.x = Math.random() * w;
+        this.y = Math.random() * h - h;
+        this.size = Math.random() * 2 + 1;
+        this.speed = Math.random() * 1 + 0.5;
+        this.color = 'rgba(0, 245, 255, 0.8)';
+      }
+
+      update() {
+        this.y += this.speed;
+        if (this.y > h) this.reset();
+      }
+
+      draw() {
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.x, this.y, this.size, this.size);
+      }
+    }
+
+    for (let i = 0; i < 120; i++) {
+      pixels.push(new PixelStar());
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, w, h);
+      pixels.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+  </script>
+</body>
+</html>

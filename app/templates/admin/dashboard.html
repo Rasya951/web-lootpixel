@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Admin - Loot Pixel{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="admin-header">
+    <h2>Dashboard Produk</h2>
+    <div class="admin-nav">
+      <a href="{{ url_for('admin.upload_product') }}" class="btn btn-primary">Upload Produk Baru</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nama</th>
+          <th>Deskripsi</th>
+          <th>PDF</th>
+          <th>Dibuat</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for product in products %}
+        <tr>
+          <td>{{ product.product_id }}</td>
+          <td>{{ product.name }}</td>
+          <td>{{ product.description }}</td>
+          <td>
+            {% if product.pdf_filename %}
+              <a href="{{ url_for('static', filename='pdfs/' + product.pdf_filename) }}" target="_blank" class="btn btn-sm btn-outline">🔍 Preview</a>
+            {% else %}
+              <span class="text-muted">(Belum ada PDF)</span>
+            {% endif %}
+          </td>
+          <td>{{ product.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+          <td>
+            <div class="admin-actions">
+              <!-- Tombol Edit & Hapus -->
+              <a href="{{ url_for('admin.edit_product', product_id=product.product_id) }}" class="btn btn-sm btn-secondary">Edit</a>
+              
+              <form method="POST" action="{{ url_for('admin.delete_product', product_id=product.product_id) }}" onsubmit="return confirm('Yakin ingin hapus?')">
+                <button type="submit" class="btn btn-sm btn-accent">Hapus</button>
+              </form>
+
+              <!-- Tombol Reset Kode -->
+              <form method="POST" action="{{ url_for('admin.reset_codes', product_id=product.product_id) }}" onsubmit="return confirm('Reset semua kode akses produk ini?')">
+                <button type="submit" class="btn btn-sm btn-warning">Reset Kode</button>
+              </form>
+
+              <!-- Tombol Lihat Kode Akses -->
+              <a href="{{ url_for('admin.access_codes', product_id=product.product_id) }}" class="btn btn-sm btn-primary">Lihat Kode Akses</a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

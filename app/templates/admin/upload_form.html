@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Produk Planner - Loot Pixel{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h2 class="text-center mb-4">Upload Produk Planner</h2>
+  
+  <div class="card">
+    <form method="POST" enctype="multipart/form-data">
+      <div class="form-section">
+        <h3 class="section-title">Informasi Produk</h3>
+        
+        <div class="form-group">
+          <label for="name">Nama Produk:</label>
+          <input type="text" id="name" name="name" required class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label for="product_id">Product ID (angka unik):</label>
+          <input type="number" id="product_id" name="product_id" required class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label for="description">Deskripsi:</label>
+          <textarea id="description" name="description" required class="form-control"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="kode_jumlah">Jumlah Kode Akses:</label>
+          <input type="number" id="kode_jumlah" name="kode_jumlah" required class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label for="final_pdf">Upload Final PDF Planner (opsional):</label>
+          <input type="file" id="final_pdf" name="final_pdf" accept=".pdf" class="form-control-file">
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3 class="section-title">Upload Aset Builder</h3>
+        
+        <!-- RING (khusus landscape) -->
+        <div class="form-group">
+          <label for="landscape_ring">Ring Landscape:</label>
+          <input type="file" id="landscape_ring" name="landscape_ring" multiple accept=".png,.svg" class="form-control-file">
+        </div>
+
+        <!-- TAB -->
+        <div class="form-group">
+          <label for="portrait_tab">Tab Portrait:</label>
+          <input type="file" id="portrait_tab" name="portrait_tab" multiple accept=".png,.svg" class="form-control-file">
+        </div>
+
+        <div class="form-group">
+          <label for="landscape_tab">Tab Landscape:</label>
+          <input type="file" id="landscape_tab" name="landscape_tab" multiple accept=".png,.svg" class="form-control-file">
+        </div>
+
+        <!-- LAYOUT WEEKLY -->
+        <div class="form-group">
+          <label for="portrait_layout_weekly">Layout Weekly Portrait (PNG atau SVG):</label>
+          <input type="file" id="portrait_layout_weekly" name="portrait_layout_weekly" multiple accept=".png,.svg" class="form-control-file">
+        </div>
+
+        <div class="form-group">
+          <label for="landscape_layout_weekly">Layout Weekly Landscape (PNG atau SVG):</label>
+          <input type="file" id="landscape_layout_weekly" name="landscape_layout_weekly" multiple accept=".png,.svg" class="form-control-file">
+        </div>
+
+        <!-- LAYOUT DAILY -->
+        <div class="form-group">
+          <label for="portrait_layout_daily">Layout Daily Portrait (PNG atau SVG):</label>
+          <input type="file" id="portrait_layout_daily" name="portrait_layout_daily" multiple accept=".png,.svg" class="form-control-file">
+        </div>
+
+        <div class="form-group">
+          <label for="landscape_layout_daily">Layout Daily Landscape (PNG atau SVG):</label>
+          <input type="file" id="landscape_layout_daily" name="landscape_layout_daily" multiple accept=".png,.svg" class="form-control-file">
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3 class="section-title">Upload Halaman Bulanan (Monthly Pages)</h3>
+        <p class="text-info"><i>* Gunakan nama file <b>01.png</b> sampai <b>12.png</b> sesuai urutan bulan</i></p>
+
+        <!-- MONTHLY -->
+        <div class="form-group">
+          <label for="portrait_monthly_monday">Monthly Portrait (Start Monday):</label>
+          <input type="file" id="portrait_monthly_monday" name="portrait_monthly_monday" multiple accept=".png" class="form-control-file">
+        </div>
+
+        <div class="form-group">
+          <label for="portrait_monthly_sunday">Monthly Portrait (Start Sunday):</label>
+          <input type="file" id="portrait_monthly_sunday" name="portrait_monthly_sunday" multiple accept=".png" class="form-control-file">
+        </div>
+
+        <div class="form-group">
+          <label for="landscape_monthly_monday">Monthly Landscape (Start Monday):</label>
+          <input type="file" id="landscape_monthly_monday" name="landscape_monthly_monday" multiple accept=".png" class="form-control-file">
+        </div>
+
+        <div class="form-group">
+          <label for="landscape_monthly_sunday">Monthly Landscape (Start Sunday):</label>
+          <input type="file" id="landscape_monthly_sunday" name="landscape_monthly_sunday" multiple accept=".png" class="form-control-file">
+        </div>
+      </div>
+
+      <div class="text-center mt-4">
+        <button type="submit" class="btn btn-primary btn-lg">Upload</button>
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline ml-2">Kembali ke Dashboard</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

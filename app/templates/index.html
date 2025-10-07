@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Welcome to Loot Pixel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #00f5ff;
+      --secondary: #7c3aed;
+      --accent: #ff006e;
+      --bg-dark: #0a0a0f;
+      --bg-card: rgba(15, 15, 25, 0.8);
+      --text-primary: #ffffff;
+      --text-secondary: #b4b8c5;
+      --gradient-primary: linear-gradient(135deg, #00f5ff 0%, #7c3aed 100%);
+      --shadow-glow: 0 0 20px rgba(0, 245, 255, 0.3);
+      --shadow-hover: 0 12px 40px rgba(0, 245, 255, 0.2);
+      --border-radius: 12px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    canvas#pixel-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -10;
+      pointer-events: none;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 3rem 2rem;
+      background: var(--bg-card);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-glow);
+      animation: slideUp 1s ease;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .holographic {
+      font-family: 'Orbitron', monospace;
+      font-size: 2.5rem;
+      background: linear-gradient(45deg, var(--primary), var(--secondary), var(--accent), var(--primary));
+      background-size: 400% 400%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: holographicShift 4s ease-in-out infinite, flicker 3s infinite;
+    }
+
+    @keyframes holographicShift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    @keyframes flicker {
+      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+        opacity: 1;
+        text-shadow: 0 0 2px #fff, 0 0 4px var(--primary), 0 0 6px var(--accent), 0 0 10px var(--secondary);
+      }
+      20%, 24%, 55% {
+        opacity: 0.8;
+        text-shadow: none;
+      }
+    }
+
+    .hero p {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      margin: 1rem 0 2rem;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 1rem 2rem;
+      border-radius: var(--border-radius);
+      background: var(--gradient-primary);
+      color: white;
+      font-weight: bold;
+      font-size: 1rem;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-glow);
+      animation: glowPulse 2.5s infinite ease-in-out;
+    }
+
+    .btn:hover {
+      transform: scale(1.05);
+      box-shadow: var(--shadow-hover);
+    }
+
+    @keyframes glowPulse {
+      0%, 100% {
+        box-shadow: 0 0 12px rgba(0, 245, 255, 0.3), 0 0 24px rgba(124, 58, 237, 0.2);
+      }
+      50% {
+        box-shadow: 0 0 24px rgba(0, 245, 255, 0.5), 0 0 48px rgba(124, 58, 237, 0.4);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Bintang Jatuh Pixel -->
+  <canvas id="pixel-canvas"></canvas>
+
+  <main>
+    <section class="hero">
+      <h1 class="holographic">Welcome to Loot Pixel</h1>
+      <p>Your digital planner builder is ready!</p>
+      <a href="{{ url_for('main.access') }}" class="btn"> Start Building</a>
+    </section>
+  </main>
+
+  <script>
+    const canvas = document.getElementById('pixel-canvas');
+    const ctx = canvas.getContext('2d');
+    let w, h;
+    let pixels = [];
+
+    function resizeCanvas() {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class PixelStar {
+      constructor() {
+        this.reset();
+      }
+
+      reset() {
+        this.x = Math.random() * w;
+        this.y = Math.random() * h - h;
+        this.size = Math.random() * 2 + 1;
+        this.speed = Math.random() * 1 + 0.5;
+        this.color = 'rgba(0, 245, 255, 0.8)';
+      }
+
+      update() {
+        this.y += this.speed;
+        if (this.y > h) this.reset();
+      }
+
+      draw() {
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.x, this.y, this.size, this.size);
+      }
+    }
+
+    for (let i = 0; i < 120; i++) {
+      pixels.push(new PixelStar());
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, w, h);
+      pixels.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+  </script>
+</body>
+</html>

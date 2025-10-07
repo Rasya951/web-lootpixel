@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Planner Preview{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h2 class="holographic mb-3">📄 Preview Your Planner</h2>
+
+  {% if data %}
+    <ul class="mb-4">
+      <li><strong>Orientation:</strong> {{ data.orientation }}</li>
+
+      {% if data.orientation == 'landscape' and data.ring %}
+        <li><strong>Ring:</strong> {{ data.ring }}</li>
+      {% endif %}
+
+      <li><strong>Tab:</strong> {{ data.tab }}</li>
+      <li><strong>Weekly Layout:</strong> {{ data.weekly_layout }}</li>
+      <li><strong>Daily Layout:</strong> {{ data.daily_layout or 'None' }}</li>
+      <li><strong>Week Starts On:</strong> {{ data.start_day }}</li>
+    </ul>
+
+    <hr class="mb-4">
+
+    {% set pdf_filename = data.pdf_filename %}
+    {% set preview_filename = data.png_filename %}
+
+    <div class="mt-5 text-center">
+      <h4 class="mb-2">PDF Preview</h4>
+      <img src="{{ url_for('static', filename='previews/' + preview_filename) }}" class="rounded shadow" width="100%" style="max-width:600px;" alt="Preview PDF">
+    </div>
+
+    <div class="mt-4 text-center">
+      <a href="{{ url_for('static', filename='pdfs/' + pdf_filename) }}" class="btn" download>⬇️ Download Your Planner</a>
+      <a href="{{ url_for('main.builder') }}" class="btn btn-secondary">← Back to Builder</a>
+    </div>
+  {% else %}
+    <div class="alert alert-warning mt-4">
+      ⚠️ No data found. Please build your planner first.
+    </div>
+    <div class="text-center mt-4">
+      <a href="{{ url_for('main.builder') }}" class="btn">← Back to Builder</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

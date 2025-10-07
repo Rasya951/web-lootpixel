@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Build Your Planner</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <!-- Perhatikan bagian <style> form dan bagian tambahan :hover efek -->
+<!-- Mulai dari tag <style> ... -->
+<style>
+    :root {
+      --primary: #04f7ff;
+      --secondary: #7c3aed;
+      --accent: #ff006e;
+      --success: #00ff88;
+      --warning: #ffb800;
+      --bg-dark: #0a0a0f;
+      --bg-darker: #050508;
+      --bg-card: rgba(15, 15, 25, 0.95);
+      --bg-glass: rgba(255, 255, 255, 0.05);
+      --text-primary: #ffffff;
+      --text-secondary: #b4b8c5;
+      --text-muted: #6b7280;
+      --gradient-primary: linear-gradient(135deg, #00f5ff 0%, #7c3aed 50%, #ff006e 100%);
+      --gradient-card: linear-gradient(145deg, rgba(15, 15, 25, 0.9), rgba(20, 20, 35, 0.8));
+      --gradient-glow: linear-gradient(45deg, #293233, #0f1011, #181a1a, #161717);
+      --shadow-glow: 0 8px 32px rgba(0, 245, 255, 0.15);
+      --shadow-hover: 0 16px 64px rgba(0, 245, 255, 0.25);
+      --shadow-intense: 0 0 40px rgba(124, 58, 237, 0.4);
+      --border-radius: 16px;
+      --border-radius-sm: 8px;
+      --error-color: #ff4757;
+      --success-color: #2ed573;
+      --glass-border: rgba(255, 255, 255, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: 
+        radial-gradient(ellipse at top, var(--bg-dark) 0%, var(--bg-darker) 100%),
+        linear-gradient(135deg, var(--bg-dark) 0%, #1a0b2e 50%, var(--bg-darker) 100%);
+      background-attachment: fixed;
+      color: var(--text-primary);
+      padding: 2rem;
+      position: relative;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    canvas#pixel-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -3;
+      pointer-events: none;
+      opacity: 0.8;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background:
+        radial-gradient(circle at 25% 25%, rgba(0, 245, 255, 0.15), transparent 40%),
+        radial-gradient(circle at 75% 75%, rgba(124, 58, 237, 0.15), transparent 40%),
+        radial-gradient(circle at 50% 10%, rgba(255, 0, 110, 0.1), transparent 50%),
+        radial-gradient(circle at 10% 80%, rgba(0, 255, 136, 0.08), transparent 50%);
+      z-index: -2;
+      animation: shift 25s ease-in-out infinite;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: 
+        conic-gradient(from 0deg, transparent, rgba(0, 245, 255, 0.03), transparent, rgba(124, 58, 237, 0.03), transparent);
+      z-index: -1;
+      animation: rotate 60s linear infinite;
+    }
+
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes shift {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    h1 {
+      text-align: center;
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 700;
+      margin-bottom: 3rem;
+      background: linear-gradient(135deg, #04f7ff 0%, #7c3aed 50%, #ff006e 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      background-size: 200% 200%;
+      animation: gradientShift 6s ease infinite;
+      position: relative;
+      padding: 1rem 0;
+      text-shadow: 0 0 10px rgba(4, 247, 255, 0.3);
+      letter-spacing: 1px;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    h1::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 4px;
+      background: var(--gradient-primary);
+      border-radius: 2px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    h1::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 2px;
+      background: var(--gradient-primary);
+      border-radius: 1px;
+      opacity: 0.6;
+    }
+
+    @keyframes pulse {
+      0%, 100% { 
+        width: 100px; 
+        opacity: 1; 
+      }
+      50% { 
+        width: 140px; 
+        opacity: 0.8; 
+      }
+    }
+
+    form {
+      max-width: 550px;
+      margin: auto;
+      background: var(--gradient-card);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 3rem;
+      border-radius: var(--border-radius);
+      border: 1px solid var(--glass-border);
+      box-shadow: 
+        var(--shadow-glow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    form::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: var(--gradient-glow);
+      background-size: 400% 400%;
+      z-index: -1;
+      filter: blur(15px);
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      border-radius: inherit;
+      animation: cardGlow 8s linear infinite;
+    }
+
+    form::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+      transition: left 0.7s;
+      pointer-events: none;
+    }
+
+    form:hover {
+      transform: translateY(-5px) scale(1.01);
+      box-shadow:
+        var(--shadow-hover),
+        var(--shadow-intense),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      border-color: rgba(0, 245, 255, 0.3);
+    }
+
+    form:hover::before {
+      opacity: 0.6;
+    }
+
+    form:hover::after {
+      left: 100%;
+    }
+
+    @keyframes cardGlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .step { 
+      display: none; 
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .step.active { 
+      display: block; 
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.8rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-family: 'Orbitron', sans-serif;
+      position: relative;
+      padding-left: 1rem;
+    }
+
+    label::before {
+      content: '▶';
+      position: absolute;
+      left: 0;
+      color: var(--primary);
+      font-size: 0.7rem;
+      animation: blink 2s infinite;
+    }
+
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0.3; }
+    }
+
+    select, button {
+      width: 100%;
+      padding: 16px 20px;
+      margin-bottom: 2rem;
+      font-size: 1rem;
+      border-radius: var(--border-radius);
+      border: 1px solid var(--glass-border);
+      background: var(--bg-glass);
+      backdrop-filter: blur(10px);
+      color: var(--text-primary);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    select::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: var(--gradient-primary);
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+
+    select:focus, select:hover {
+      outline: none;
+      border-color: var(--primary);
+      background: rgba(0, 245, 255, 0.05);
+      box-shadow: 
+        0 0 0 3px rgba(0, 245, 255, 0.1),
+        0 8px 25px rgba(0, 0, 0, 0.15);
+      transform: translateY(-2px);
+    }
+
+    select:focus::before, select:hover::before {
+      transform: scaleX(1);
+    }
+
+    /* Error state untuk field yang tidak valid */
+    select.error {
+      border-color: var(--error-color);
+      background: rgba(255, 71, 87, 0.1);
+      box-shadow: 
+        0 0 0 3px rgba(255, 71, 87, 0.2),
+        0 0 20px rgba(255, 71, 87, 0.3);
+      animation: shake 0.6s ease-in-out, errorPulse 2s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0) translateY(-2px); }
+      25% { transform: translateX(-8px) translateY(-2px); }
+      75% { transform: translateX(8px) translateY(-2px); }
+    }
+
+    @keyframes errorPulse {
+      0% { background: rgba(255, 71, 87, 0.1); }
+      50% { background: rgba(255, 71, 87, 0.15); }
+      100% { background: rgba(255, 71, 87, 0.1); }
+    }
+
+    button {
+      background: var(--gradient-primary);
+      color: #fff;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      border: none;
+      box-shadow: 
+        var(--shadow-glow),
+        0 4px 15px rgba(0, 0, 0, 0.2);
+      position: relative;
+      overflow: hidden;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    button:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 
+        var(--shadow-hover),
+        0 12px 35px rgba(0, 0, 0, 0.25);
+    }
+
+    button:hover::before {
+      left: 100%;
+    }
+
+    button:active {
+      transform: translateY(-1px) scale(0.98);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      filter: grayscale(0.3);
+    }
+
+    /* Loading state untuk button */
+    button.loading {
+      color: transparent;
+      background: var(--gradient-primary);
+    }
+
+    button.loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 24px;
+      height: 24px;
+      margin: -12px 0 0 -12px;
+      border: 3px solid transparent;
+      border-top: 3px solid rgba(255, 255, 255, 0.8);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    #preview-container {
+      text-align: center;
+      margin-top: 4rem;
+      padding: 2rem;
+      background: var(--gradient-card);
+      backdrop-filter: blur(20px);
+      border-radius: var(--border-radius);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--shadow-glow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    #preview-container::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: conic-gradient(from 0deg, transparent 340deg, rgba(0, 245, 255, 0.05) 360deg);
+      animation: rotate 20s linear infinite;
+      z-index: -1;
+    }
+
+    #preview-container h3 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.4rem;
+      margin-bottom: 1.5rem;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 600;
+    }
+
+    #preview-img {
+      width: 100%;
+      max-width: 500px;
+      border-radius: var(--border-radius);
+      box-shadow: 
+        var(--shadow-glow),
+        0 8px 32px rgba(0, 0, 0, 0.3);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 2px solid var(--glass-border);
+    }
+
+    #preview-img:hover {
+      transform: scale(1.02);
+      box-shadow: 
+        var(--shadow-hover),
+        0 16px 48px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Loading state untuk preview */
+    #preview-img.loading {
+      opacity: 0.6;
+      filter: blur(3px) brightness(0.8);
+    }
+
+    .preview-loading {
+      position: relative;
+      display: inline-block;
+    }
+
+    .preview-loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 60px;
+      height: 60px;
+      border: 4px solid rgba(0, 245, 255, 0.2);
+      border-top: 4px solid var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      z-index: 2;
+    }
+
+    .preview-loading::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100px;
+      height: 100px;
+      background: radial-gradient(circle, rgba(10, 10, 15, 0.9) 0%, transparent 70%);
+      border-radius: 50%;
+      z-index: 1;
+    }
+
+    #loading, #downloadSection {
+      display: none;
+      text-align: center;
+      margin-top: 3rem;
+      padding: 2rem;
+      background: var(--gradient-card);
+      backdrop-filter: blur(20px);
+      border-radius: var(--border-radius);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--shadow-glow);
+      animation: slideUp 0.5s ease-out;
+    }
+
+    @keyframes slideUp {
+      0% { 
+        opacity: 0; 
+        transform: translateY(30px); 
+      }
+      100% { 
+        opacity: 1; 
+        transform: translateY(0); 
+      }
+    }
+
+    #loading p {
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+      margin-bottom: 1rem;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    #loading img {
+      margin-top: 1rem;
+      border-radius: 50%;
+      box-shadow: 0 0 20px rgba(0, 245, 255, 0.3);
+    }
+
+    #downloadSection h3 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+      background: var(--gradient-glow);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      background-size: 400% 400%;
+      animation: holo 3s ease-in-out infinite;
+    }
+
+    #downloadSection p {
+      margin-top: 1rem;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+
+    a button {
+      margin-top: 1.5rem;
+      font-size: 1.1rem;
+      padding: 18px 24px;
+    }
+
+    /* Error message styling */
+    .error-message {
+      color: var(--error-color);
+      font-size: 0.85rem;
+      margin-top: -1.5rem;
+      margin-bottom: 1.5rem;
+      display: none;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 71, 87, 0.1);
+      border-left: 3px solid var(--error-color);
+      border-radius: var(--border-radius-sm);
+      animation: fadeIn 0.4s ease;
+      font-weight: 500;
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      0% { 
+        opacity: 0; 
+        transform: translateY(-15px) scale(0.95); 
+      }
+      100% { 
+        opacity: 1; 
+        transform: translateY(0) scale(1); 
+      }
+    }
+
+    /* Preview error styling */
+    .preview-error {
+      background: var(--gradient-card);
+      backdrop-filter: blur(20px);
+      border: 2px dashed var(--glass-border);
+      border-radius: var(--border-radius);
+      padding: 3rem 2rem;
+      color: var(--text-muted);
+      font-style: italic;
+      transition: all 0.3s ease;
+    }
+
+    .preview-error:hover {
+      border-color: var(--primary);
+      color: var(--text-secondary);
+    }
+
+    .preview-error div {
+      filter: grayscale(1);
+      transition: filter 0.3s ease;
+    }
+
+    .preview-error:hover div {
+      filter: grayscale(0);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+      
+      form {
+        padding: 2rem 1.5rem;
+        margin: 0 0.5rem;
+      }
+      
+      h1 {
+        font-size: 2rem;
+        margin-bottom: 2rem;
+      }
+      
+      #preview-container {
+        margin-top: 2rem;
+        padding: 1.5rem;
+      }
+    }
+
+    /* Modern scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-darker);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--gradient-primary);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--gradient-glow);
+    }
+
+    #loading img {
+      margin-top: 1rem;
+    }
+
+    a button {
+      margin-top: 1rem;
+    }
+
+    /* Error message styling */
+    .error-message {
+      color: var(--error-color);
+      font-size: 0.8rem;
+      margin-top: -1rem;
+      margin-bottom: 1rem;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translateY(-10px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Preview error styling */
+    .preview-error {
+      background: var(--bg-card);
+      border: 2px dashed var(--error-color);
+      border-radius: var(--border-radius);
+      padding: 2rem;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+  </style>
+
+</head>
+<body>
+  <canvas id="pixel-canvas"></canvas>
+
+  <h1>Personalize Your Digital Planner</h1>
+  <form onsubmit="submitBuild(event)">
+    <div class="step">
+      <label>Step 1: Orientation</label>
+      <select id="orientation" required onchange="updatePreview()">
+        <option value="">-- Select Orientation --</option>
+        <option value="portrait">Portrait</option>
+        <option value="landscape">Landscape</option>
+      </select>
+      <div class="error-message" id="orientation-error">Please select an orientation</div>
+      <button type="button" onclick="nextStep()">Next</button>
+    </div>
+
+    <div class="step" id="ring-step">
+      <label>Step 2: Ring Color (Only for Landscape)</label>
+      <select id="ring" onchange="updatePreview()">
+        <option value="">-- Select Ring --</option>
+        {% for r in rings %}
+        <option value="{{ r }}">{{ r|capitalize }}</option>
+        {% endfor %}
+      </select>
+      <div class="error-message" id="ring-error">Please select a ring color</div>
+      <button type="button" onclick="prevStep()">Back</button>
+      <button type="button" onclick="nextStep()">Next</button>
+    </div>
+
+    <div class="step">
+      <label>Step 3: Tab Color</label>
+      <select id="tab" required onchange="updatePreview()">
+        <option value="">-- Select Tab --</option>
+        {% for t in tabs %}
+        <option value="{{ t }}">{{ t|capitalize }}</option>
+        {% endfor %}
+      </select>
+      <div class="error-message" id="tab-error">Please select a tab color</div>
+      <button type="button" onclick="prevStep()">Back</button>
+      <button type="button" onclick="nextStep()">Next</button>
+    </div>
+
+    <div class="step">
+      <label>Step 4: Weekly Layout</label>
+      <select id="weekly_layout" required onchange="updatePreview()">
+        <option value="">-- Select Weekly Layout --</option>
+        {% for w in weekly_layouts %}
+        <option value="{{ w }}">{{ w|capitalize }}</option>
+        {% endfor %}
+      </select>
+      <div class="error-message" id="weekly_layout-error">Please select a weekly layout</div>
+      <button type="button" onclick="prevStep()">Back</button>
+      <button type="button" onclick="nextStep()">Next</button>
+    </div>
+
+    <div class="step">
+      <label>Step 5: Daily Layout (optional)</label>
+      <select id="daily_layout" onchange="updatePreview()">
+        <option value="">None</option>
+        {% for d in daily_layouts %}
+        <option value="{{ d }}">{{ d|capitalize }}</option>
+        {% endfor %}
+      </select>
+      <button type="button" onclick="prevStep()">Back</button>
+      <button type="button" onclick="nextStep()">Next</button>
+    </div>
+
+    <div class="step">
+      <label>Step 6: Week Starts On</label>
+      <select id="start_day" required onchange="updatePreview()">
+        <option value="">-- Select Start Day --</option>
+        <option value="monday">Monday</option>
+        <option value="sunday">Sunday</option>
+      </select>
+      <div class="error-message" id="start_day-error">Please select a start day</div>
+      <button type="button" onclick="prevStep()">Back</button>
+      <button type="submit" id="build-btn">🛠️ Build Planner</button>
+      <button type="button" id="preview-btn" onclick="previewPDF()" style="margin-top: 1rem; background: var(--gradient-glow);">👁️ Preview PDF</button>
+    </div>
+  </form>
+
+  <div id="preview-container">
+    <h3>Preview</h3>
+    <div id="preview-wrapper">
+      <img id="preview-img" src="/static/placeholder_preview.png" alt="Planner Preview">
+    </div>
+  </div>
+
+  <div id="loading">
+    <p>⏳ Building your planner...</p>
+    <img src="/static/loading.gif" width="100">
+  </div>
+
+  <div id="downloadSection">
+    <h3>🎉 Your Planner is Ready!</h3>
+    <a id="downloadLink" href="#" download>
+      <button type="button">⬇️ Download PDF</button>
+    </a>
+    <p>💖 Thank you for shopping at Loot Pixel!</p>
+  </div>
+
+  <script>
+    const product_id = {{ product_id | tojson }};
+    let currentStep = 0;
+    let previewTimeout = null;
+
+    window.onload = () => {
+      document.getElementById('orientation').addEventListener('change', handleOrientationChange);
+      handleOrientationChange();
+      showStep(currentStep);
+    };
+
+    function getVisibleSteps() {
+      const orientation = document.getElementById('orientation').value;
+      const steps = Array.from(document.querySelectorAll('.step'));
+      return steps.filter(step => {
+        if (step.id === 'ring-step') return orientation === 'landscape';
+        return true;
+      });
+    }
+
+    function handleOrientationChange() {
+      updateStepLabels();
+      currentStep = 0;
+      showStep(currentStep);
+      updatePreview();
+    }
+
+    function updateStepLabels() {
+      const visibleSteps = getVisibleSteps();
+      visibleSteps.forEach((step, i) => {
+        const label = step.querySelector('label');
+        if (label) {
+          const content = label.textContent.split(": ")[1] || '';
+          label.textContent = `Step ${i + 1}: ${content}`;
+        }
+      });
+    }
+
+    function showStep(index) {
+      const steps = document.querySelectorAll('.step');
+      steps.forEach(step => step.classList.remove('active'));
+      const visibleSteps = getVisibleSteps();
+      visibleSteps.forEach((step, i) => {
+        if (i === index) step.classList.add('active');
+      });
+      currentStep = Math.max(0, Math.min(index, visibleSteps.length - 1));
+    }
+
+    // Validasi field sebelum next step
+    function validateCurrentStep() {
+      const visibleSteps = getVisibleSteps();
+      const currentStepElement = visibleSteps[currentStep];
+      const selects = currentStepElement.querySelectorAll('select[required]');
+      let isValid = true;
+
+      selects.forEach(select => {
+        const errorElement = document.getElementById(`${select.id}-error`);
+        
+        if (!select.value || select.value === '') {
+          // Show error
+          select.classList.add('error');
+          if (errorElement) {
+            errorElement.classList.add('show');
+          }
+          isValid = false;
+
+          // Remove error class setelah 3 detik
+          setTimeout(() => {
+            select.classList.remove('error');
+            if (errorElement) {
+              errorElement.classList.remove('show');
+            }
+          }, 3000);
+        } else {
+          // Remove error jika ada
+          select.classList.remove('error');
+          if (errorElement) {
+            errorElement.classList.remove('show');
+          }
+        }
+      });
+
+      // Validasi khusus untuk landscape + ring
+      const orientation = document.getElementById('orientation').value;
+      if (orientation === 'landscape' && currentStep === 1) {
+        const ringSelect = document.getElementById('ring');
+        const ringError = document.getElementById('ring-error');
+        
+        if (!ringSelect.value || ringSelect.value === '') {
+          ringSelect.classList.add('error');
+          if (ringError) {
+            ringError.classList.add('show');
+          }
+          isValid = false;
+
+          setTimeout(() => {
+            ringSelect.classList.remove('error');
+            if (ringError) {
+              ringError.classList.remove('show');
+            }
+          }, 3000);
+        }
+      }
+
+      return isValid;
+    }
+
+    function nextStep() {
+      if (!validateCurrentStep()) {
+        return; // Jangan lanjut jika validasi gagal
+      }
+
+      const visibleSteps = getVisibleSteps();
+      if (currentStep < visibleSteps.length - 1) {
+        currentStep++;
+        showStep(currentStep);
+      }
+    }
+
+    function prevStep() {
+      const visibleSteps = getVisibleSteps();
+      if (currentStep > 0) {
+        currentStep--;
+        showStep(currentStep);
+      }
+    }
+
+    function updatePreview() {
+      // Clear timeout sebelumnya untuk debounce
+      if (previewTimeout) {
+        clearTimeout(previewTimeout);
+      }
+
+      // Debounce preview update
+      previewTimeout = setTimeout(() => {
+        updatePreviewImage();
+      }, 300);
+    }
+
+    function updatePreviewImage() {
+      const orientation = document.getElementById('orientation')?.value || 'portrait';
+      const ring = orientation === 'landscape' ? (document.getElementById('ring')?.value || 'none') : 'none';
+      const tab = document.getElementById('tab')?.value || 'none';
+      const weekly = document.getElementById('weekly_layout')?.value || 'none';
+      const daily = document.getElementById('daily_layout')?.value || 'none';
+      const startDay = document.getElementById('start_day')?.value || 'monday';
+      
+      const filename = `${product_id}-${orientation}-${ring}-${tab}-${weekly}-${daily}-${startDay}.png`;
+      const previewImg = document.getElementById('preview-img');
+      const previewWrapper = document.getElementById('preview-wrapper');
+      
+      // Show loading state
+      previewImg.classList.add('loading');
+      previewWrapper.classList.add('preview-loading');
+
+      // Create new image to test if it loads
+      const testImg = new Image();
+      
+      testImg.onload = function() {
+        // Image loaded successfully
+        previewImg.src = `/static/previews/${filename}?v=${Date.now()}`;
+        previewImg.classList.remove('loading');
+        previewWrapper.classList.remove('preview-loading');
+        
+        // Remove any existing error state
+        if (previewWrapper.querySelector('.preview-error')) {
+          previewWrapper.querySelector('.preview-error').remove();
+          previewImg.style.display = 'block';
+        }
+      };
+
+      testImg.onerror = function() {
+        // Image failed to load, show fallback
+        showPreviewFallback();
+      };
+
+      testImg.src = `/static/previews/${filename}?v=${Date.now()}`;
+    }
+
+    function showPreviewFallback() {
+      const previewImg = document.getElementById('preview-img');
+      const previewWrapper = document.getElementById('preview-wrapper');
+      
+      // Hide loading state
+      previewImg.classList.remove('loading');
+      previewWrapper.classList.remove('preview-loading');
+      
+      // Hide image and show error message
+      previewImg.style.display = 'none';
+      
+      // Remove existing error message if any
+      const existingError = previewWrapper.querySelector('.preview-error');
+      if (existingError) {
+        existingError.remove();
+      }
+      
+      // Create fallback message
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'preview-error';
+      errorDiv.innerHTML = `
+        <div style="font-size: 3rem; margin-bottom: 1rem;">masih proses bang</div>
+        <p>Preview will be generated when you build your planner</p>
+        <small>Complete your selections and click "Build Planner" to see the final result</small>
+      `;
+      
+      previewWrapper.appendChild(errorDiv);
+    }
+
+    function validateForm() {
+      const orientation = document.getElementById('orientation').value;
+      const tab = document.getElementById('tab').value;
+      const weekly = document.getElementById('weekly_layout').value;
+      const startDay = document.getElementById('start_day').value;
+      
+      if (!orientation || !tab || !weekly || !startDay) {
+        alert('Please complete all required fields before building your planner.');
+        return false;
+      }
+
+      // Validasi khusus untuk landscape
+      if (orientation === 'landscape') {
+        const ring = document.getElementById('ring').value;
+        if (!ring) {
+          alert('Please select a ring color for landscape orientation.');
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    function submitBuild(event) {
+      event.preventDefault();
+      
+      if (!validateForm()) {
+        return;
+      }
+
+      const buildBtn = document.getElementById('build-btn');
+      buildBtn.classList.add('loading');
+      buildBtn.disabled = true;
+
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('downloadSection').style.display = 'none';
+
+      const data = {
+        orientation: document.getElementById('orientation').value,
+        ring: document.getElementById('ring')?.value || '',
+        tab: document.getElementById('tab').value,
+        weekly_layout: document.getElementById('weekly_layout').value,
+        daily_layout: document.getElementById('daily_layout').value,
+        start_day: document.getElementById('start_day').value,
+        product_id: product_id
+      };
+
+      fetch('/build', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then(res => {
+        if (res.error) {
+          throw new Error(res.error);
+        }
+        
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('downloadSection').style.display = 'block';
+        document.getElementById('downloadLink').href = `/static/pdfs/${res.filename}`;
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('loading').style.display = 'none';
+        
+        // Show error message to user
+        alert(`Failed to build planner: ${error.message}. Please try again.`);
+      })
+      .finally(() => {
+        // Reset button state
+        buildBtn.classList.remove('loading');
+        buildBtn.disabled = false;
+      });
+    }
+    
+    function previewPDF() {
+      if (!validateForm()) {
+        return;
+      }
+      
+      const previewBtn = document.getElementById('preview-btn');
+      previewBtn.classList.add('loading');
+      previewBtn.disabled = true;
+      
+      document.getElementById('loading').style.display = 'block';
+      
+      const data = {
+        orientation: document.getElementById('orientation').value,
+        ring: document.getElementById('ring')?.value || '',
+        tab: document.getElementById('tab').value,
+        weekly_layout: document.getElementById('weekly_layout').value,
+        daily_layout: document.getElementById('daily_layout').value,
+        start_day: document.getElementById('start_day').value,
+        product_id: product_id
+      };
+      
+      fetch('/build', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then(res => {
+        if (res.error) {
+          throw new Error(res.error);
+        }
+        
+        // Redirect to preview page with query parameters
+        const params = new URLSearchParams({
+          ring: data.ring,
+          tab: data.tab,
+          weekly_layout: data.weekly_layout,
+          daily_layout: data.daily_layout,
+          start_day: data.start_day
+        });
+        
+        window.location.href = `/preview?${params.toString()}`;
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('loading').style.display = 'none';
+        
+        // Show error message to user
+        alert(`Failed to generate preview: ${error.message}. Please try again.`);
+      })
+      .finally(() => {
+        // Reset button state
+        previewBtn.classList.remove('loading');
+        previewBtn.disabled = false;
+      });
+    }
+
+    // Pixel Falling Background
+    const canvas = document.getElementById('pixel-canvas');
+    const ctx = canvas.getContext('2d');
+    let w, h;
+    let stars = [];
+
+    function resizeCanvas() {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class PixelStar {
+      constructor() {
+        this.reset();
+      }
+
+      reset() {
+        this.x = Math.random() * w;
+        this.y = Math.random() * h - h;
+        this.size = Math.random() * 2 + 1;
+        this.speed = Math.random() * 1 + 0.5;
+        this.color = 'rgba(0, 245, 255, 0.8)';
+      }
+
+      update() {
+        this.y += this.speed;
+        if (this.y > h) this.reset();
+      }
+
+      draw() {
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.x, this.y, this.size, this.size);
+      }
+    }
+
+    function initStars(count = 80) {
+      stars = [];
+      for (let i = 0; i < count; i++) {
+        stars.push(new PixelStar());
+      }
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, w, h);
+      stars.forEach(star => {
+        star.update();
+        star.draw();
+      });
+      requestAnimationFrame(animate);
+    }
+
+    initStars();
+    animate();
+  </script>
+</body>
+</html>

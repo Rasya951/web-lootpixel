@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Planner Preview - Loot Pixel{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="admin-header">
+    <h2>📄 Final Planner Preview</h2>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline">⬅️ Kembali ke Dashboard</a>
+  </div>
+
+  {% if data %}
+    <div class="card mb-4">
+      <div class="d-flex flex-wrap gap-3">
+        <div class="info-item">
+          <span class="info-label">Orientation:</span>
+          <span class="info-value">{{ data.orientation }}</span>
+        </div>
+
+        {% if data.orientation == 'landscape' and data.ring %}
+          <div class="info-item">
+            <span class="info-label">Ring:</span>
+            <span class="info-value">{{ data.ring }}</span>
+          </div>
+        {% endif %}
+
+        <div class="info-item">
+          <span class="info-label">Tab:</span>
+          <span class="info-value">{{ data.tab }}</span>
+        </div>
+
+        <div class="info-item">
+          <span class="info-label">Weekly Layout:</span>
+          <span class="info-value">{{ data.weekly_layout }}</span>
+        </div>
+
+        <div class="info-item">
+          <span class="info-label">Daily Layout:</span>
+          <span class="info-value">{{ data.daily_layout or 'None' }}</span>
+        </div>
+
+        <div class="info-item">
+          <span class="info-label">Week Starts On:</span>
+          <span class="info-value">{{ data.start_day }}</span>
+        </div>
+      </div>
+    </div>
+
+    {% set prefix = data.product_id|string + '_' %}
+    {% set pdf_filename = data.product_id ~ '-' ~ data.orientation ~ '-' ~ (data.ring or '') ~ '-' ~ data.tab ~ '-' ~ data.weekly_layout ~ '-' ~ (data.daily_layout or 'none') ~ '-' ~ data.start_day ~ '.pdf' %}
+    {% set preview_filename = pdf_filename.replace('.pdf', '.png') %}
+
+    <h3 class="section-title">Preview Components</h3>
+
+    <div class="card">
+      <div class="d-flex flex-wrap gap-4 justify-content-center">
+        {% if data.orientation == 'landscape' and data.ring %}
+          <div class="component-preview">
+            <h4 class="component-title">Ring</h4>
+            <div class="component-image">
+              <img src="{{ url_for('static', filename='assets/rings/' + prefix + 'ring_' + data.ring|lower + '.png') }}"
+                  width="150" class="rounded shadow-sm" alt="Ring">
+            </div>
+          </div>
+        {% endif %}
+
+        <div class="component-preview">
+          <h4 class="component-title">Tab</h4>
+          <div class="component-image">
+            <img src="{{ url_for('static', filename='assets/tabs/' + prefix + 'tab_' + data.tab|lower + '.png') }}"
+                width="150" class="rounded shadow-sm" alt="Tab">
+          </div>
+        </div>
+
+        <div class="component-preview">
+          <h4 class="component-title">Weekly Layout</h4>
+          <div class="component-image">
+            <img src="{{ url_for('static', filename='assets/layouts/' + prefix + 'weekly_' + data.weekly_layout|lower + '.png') }}"
+                width="150" class="rounded shadow-sm" alt="Weekly">
+          </div>
+        </div>
+
+        {% if data.daily_layout %}
+          <div class="component-preview">
+            <h4 class="component-title">Daily Layout</h4>
+            <div class="component-image">
+              <img src="{{ url_for('static', filename='assets/layouts/' + prefix + 'daily_' + data.daily_layout|lower + '.png') }}"
+                  width="150" class="rounded shadow-sm" alt="Daily">
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <h3 class="section-title mt-5">Generated Preview</h3>
+    <div class="card text-center">
+      <img src="{{ url_for('static', filename='previews/' + preview_filename) }}" class="rounded shadow" width="100%" style="max-width:600px;" alt="Preview PDF">
+      
+      <div class="mt-4">
+        <a href="{{ url_for('main.download_file', filename=pdf_filename) }}" class="btn btn-primary btn-lg">⬇️ Download Your Planner</a>
+      </div>
+    </div>
+  {% else %}
+    <div class="alert alert-warning mt-4">
+      ⚠️ No data found. Please build your planner first.
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Kode Akses - {{ product.name }} - Loot Pixel{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="admin-header">
+    <h2>Kode Akses untuk {{ product.name }}</h2>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline">⬅️ Kembali ke Dashboard</a>
+  </div>
+  
+  <div class="card">
+    <div class="d-flex flex-column gap-2">
+      {% for code in codes %}
+        <div class="admin-card mb-2">
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="text-primary" style="font-family: 'Orbitron', sans-serif; letter-spacing: 1px;">{{ code.code }}</span>
+            <span class="text-muted">{{ code.status }}</span>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

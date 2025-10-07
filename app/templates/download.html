@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Download Planner</title>
+</head>
+<body>
+  <h1>🎉 Your Planner is Ready!</h1>
+
+  {% if data %}
+    <h3>Planner Summary:</h3>
+    <ul>
+      <li><strong>Orientation:</strong> {{ data.orientation }}</li>
+
+      {% if data.orientation == 'landscape' and data.ring %}
+        <li><strong>Ring:</strong> {{ data.ring }}</li>
+      {% endif %}
+
+      <li><strong>Tab:</strong> {{ data.tab }}</li>
+      <li><strong>Weekly Layout:</strong> {{ data.weekly_layout }}</li>
+      <li><strong>Daily Layout:</strong> {{ data.daily_layout or 'None' }}</li>
+      <li><strong>Week Starts On:</strong> {{ data.start_day }}</li>
+    </ul>
+
+    <hr>
+
+    {% set pdf_filename = data.product_id|string + '_planner.pdf' %}
+    <a href="{{ url_for('static', filename='pdfs/' + pdf_filename) }}" download>
+      <button style="padding: 10px 20px; font-size: 16px;">⬇️ Download Planner PDF</button>
+    </a>
+
+  {% else %}
+    <p>No planner data found. Please start from the builder.</p>
+  {% endif %}
+
+  <br><br>
+  <a href="{{ url_for('main.index') }}">← Back to Home</a>
+</body>
+</html>

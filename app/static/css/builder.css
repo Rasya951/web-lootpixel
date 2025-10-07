@@ -1,0 +1,157 @@
+/* ==============================
+   Loot Pixel Builder - Cyberpunk Neon Glassmorphism
+   ============================== */
+
+:root {
+  --primary: #04f7ff;
+  --secondary: #7c3aed;
+  --accent: #ff006e;
+  --success: #00ff88;
+  --warning: #ffb800;
+  --bg-dark: #0a0a0f;
+  --bg-darker: #050508;
+  --bg-card: rgba(15, 15, 25, 0.95);
+  --bg-glass: rgba(255, 255, 255, 0.05);
+  --text-primary: #ffffff;
+  --text-secondary: #b4b8c5;
+  --text-muted: #6b7280;
+  --gradient-primary: linear-gradient(135deg, #00f5ff 0%, #7c3aed 50%, #ff006e 100%);
+  --gradient-card: linear-gradient(145deg, rgba(15, 15, 25, 0.9), rgba(20, 20, 35, 0.8));
+  --gradient-glow: linear-gradient(45deg, #293233, #0f1011, #181a1a, #161717);
+  --shadow-glow: 0 8px 32px rgba(0, 245, 255, 0.15);
+  --shadow-hover: 0 16px 64px rgba(0, 245, 255, 0.25);
+  --shadow-intense: 0 0 40px rgba(124, 58, 237, 0.4);
+  --border-radius: 16px;
+  --border-radius-sm: 8px;
+  --error-color: #ff4757;
+  --success-color: #2ed573;
+  --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: 
+    radial-gradient(ellipse at top, var(--bg-dark) 0%, var(--bg-darker) 100%),
+    linear-gradient(135deg, var(--bg-dark) 0%, #1a0b2e 50%, var(--bg-darker) 100%);
+  background-attachment: fixed;
+  color: var(--text-primary);
+  padding: 2rem;
+  position: relative;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+canvas#pixel-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -3;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background:
+    radial-gradient(circle at 25% 25%, rgba(0, 245, 255, 0.15), transparent 40%),
+    radial-gradient(circle at 75% 75%, rgba(124, 58, 237, 0.15), transparent 40%),
+    radial-gradient(circle at 50% 10%, rgba(255, 0, 110, 0.1), transparent 50%),
+    radial-gradient(circle at 10% 80%, rgba(0, 255, 136, 0.08), transparent 50%);
+  z-index: -2;
+  animation: shift 25s ease-in-out infinite;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: 
+    conic-gradient(from 0deg, transparent, rgba(0, 245, 255, 0.03), transparent, rgba(124, 58, 237, 0.03), transparent);
+  z-index: -1;
+  animation: rotate 60s linear infinite;
+}
+
+@keyframes rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes shift {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* ==============================
+   Heading
+   ============================== */
+
+h1 {
+  text-align: center;
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 700;
+  margin-bottom: 3rem;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200% 200%;
+  animation: gradientShift 6s ease infinite;
+  position: relative;
+  padding: 1rem 0;
+  text-shadow: 0 0 10px rgba(4, 247, 255, 0.3);
+  letter-spacing: 1px;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+h1::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 4px;
+  background: var(--gradient-primary);
+  border-radius: 2px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+h1::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 2px;
+  background: var(--gradient-primary);
+  border-radius: 1px;
+  opacity: 0.6;
+}
+
+@keyframes pulse {
+  0%, 100% { width: 100px; opacity: 1; }
+  50% { width: 140px; opacity: 0.8; }
+}
+
+/* Form, Step, Select, Button, Preview
+   (dipotong biar ga kepanjangan di sini)
+   tapi aku bakal kasih full version ke kamu 
+*/
+

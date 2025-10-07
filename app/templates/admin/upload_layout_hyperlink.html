@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload Layout PDF (Hyperlink) - Loot Pixel{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 800px;">
+  <div class="admin-header">
+    <h2>Upload Layout PDF (Hyperlink)</h2>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline">⬅️ Kembali ke Dashboard</a>
+  </div>
+  
+  <div class="card">
+    <form method="POST" enctype="multipart/form-data">
+      <div class="form-group">
+        <label for="layout_type">Tipe Layout:</label>
+        <select name="layout_type" id="layout_type" required class="form-control">
+          <option value="">-- Pilih --</option>
+          <option value="weekly">Weekly</option>
+          <option value="daily">Daily</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="layout_name">Nama Layout:</label>
+        <input type="text" name="layout_name" id="layout_name" placeholder="Contoh: boxed" required class="form-control">
+      </div>
+
+      <div class="form-group">
+        <label for="pdf_file">File PDF:</label>
+        <input type="file" name="pdf_file" id="pdf_file" accept=".pdf" required class="form-control-file">
+      </div>
+
+      <div class="text-center mt-4">
+        <button type="submit" class="btn btn-primary">Upload & Ekstrak Hyperlink</button>
+      </div>
+    </form>
+  </div>
+  
+  <div class="info-box mt-4">
+    <p class="text-info">
+      <i class="fas fa-info-circle"></i> File PDF akan disimpan dan semua hyperlink di dalamnya akan otomatis diekstrak ke database.
+    </p>
+  </div>
+</div>
+{% endblock %}
