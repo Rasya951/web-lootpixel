@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify, flash, send_from_directory
-from app.models import AccessCode, DownloadLog, Product
+from flask_login import current_user, login_required
+from app.models import AccessCode, DownloadLog, Product, GeneratedPlanner, User
 from app.utils import generate_planner_pdf, get_product_id_from_code, send_access_code_email, verify_etsy_signature
 from app import db, mail
 from datetime import datetime
@@ -9,6 +10,7 @@ import random
 import string
 import hmac
 import hashlib
+import uuid
 
 main = Blueprint('main', __name__)
 
@@ -115,125 +117,159 @@ def map_etsy_listing_to_product_id(listing_id):
 
 @main.route('/access', methods=['GET', 'POST'])
 def access():
-    error = None
+    # Jika user sudah login, redirect ke dashboard
+    if current_user.is_authenticated:
+        return redirect(url_for('user.dashboard'))
+        
     if request.method == 'POST':
-        kode = request.form.get('code', '').strip()
-        access = AccessCode.query.filter_by(code=kode, status='not used').first()
+        access_code = request.form.get('access_code')
+        
+        # Validasi kode akses
+        code = AccessCode.query.filter_by(code=access_code).first()
+        
+        if not code:
+            flash('Kode akses tidak valid', 'danger')
+            return redirect(url_for('main.access'))
+            
+        if code.status == 'used' or code.status == 'claimed':
+            flash('Kode akses sudah digunakan', 'warning')
+            return redirect(url_for('main.access'))
+            
+        # Simpan kode akses di session
+        session['access_code'] = access_code
+        session['product_id'] = code.product_id
+        
+        # Update status kode akses
+        code.status = 'used'
+        code.used_at = datetime.utcnow()
+        db.session.commit()
+        
+        # Redirect ke halaman builder
+        return redirect(url_for('main.builder', product_id=code.product_id))
+        
+    return render_template('access.html')
 
-        if access:
-            session['access_granted'] = True
-            session['access_code'] = kode
-            return redirect(url_for('main.builder'))
-        else:
-            error = "Invalid or already used access code."
-
-    return render_template('access.html', error=error)
-
-@main.route('/builder', methods=['GET'])
-def builder():
-    if not session.get('access_granted'):
+@main.route('/builder/<int:product_id>')
+def builder(product_id):
+    # Cek apakah user memiliki akses
+    has_access = False
+    
+    # Jika user login, cek apakah memiliki akses ke produk
+    if current_user.is_authenticated:
+        product = Product.query.filter_by(product_id=product_id).first()
+        if product in current_user.products:
+            has_access = True
+    # Jika tidak login, cek dari session
+    elif session.get('access_code') and session.get('product_id') == product_id:
+        has_access = True
+        
+    if not has_access:
+        flash('Anda tidak memiliki akses ke produk ini', 'danger')
         return redirect(url_for('main.access'))
-
-    access_code = session.get('access_code')
-    product_id = get_product_id_from_code(access_code)
-    if not product_id:
-        flash("Kode akses tidak valid.")
-        return redirect(url_for('main.access'))
-
-    session['product_id'] = product_id
-    orientation = session.get('orientation', 'portrait')
-    asset_base = os.path.join('static', 'assets', str(product_id), orientation)
-
-    rings = list_assets_clean(os.path.join(asset_base, 'rings'))
-    tabs = list_assets_clean(os.path.join(asset_base, 'tabs'))
-    weekly_layouts = list_layouts_clean(os.path.join(asset_base, 'layouts'), ['weekly_', 'weekly-', 'weekly'])
-    daily_layouts = list_layouts_clean(os.path.join(asset_base, 'layouts'), ['daily_', 'daily-', 'daily'])
-
-    return render_template(
-        'builder.html',
-        product_id=product_id,
-        orientation=orientation,
-        rings=rings,
-        tabs=tabs,
-        weekly_layouts=weekly_layouts,
-        daily_layouts=daily_layouts
-    )
-
-@main.route('/get_assets/<int:product_id>/<orientation>')
-def get_assets(product_id, orientation):
-    """Return daftar aset untuk product_id + orientation (dipakai AJAX builder)."""
-    session['orientation'] = orientation  # simpan di session biar keingat
-    asset_base = os.path.join('static', 'assets', str(product_id), orientation)
-
-    rings = list_assets_clean(os.path.join(asset_base, 'rings'))
-    tabs = list_assets_clean(os.path.join(asset_base, 'tabs'))
-    weekly_layouts = list_layouts_clean(os.path.join(asset_base, 'layouts'), ['weekly_', 'weekly-', 'weekly'])
-    daily_layouts = list_layouts_clean(os.path.join(asset_base, 'layouts'), ['daily_', 'daily-', 'daily'])
-
-    return jsonify({
-        'rings': rings,
-        'tabs': tabs,
-        'weekly_layouts': weekly_layouts,
-        'daily_layouts': daily_layouts
-    })
+    
+    # Ambil data produk
+    product = Product.query.filter_by(product_id=product_id).first()
+    
+    if not product:
+        flash('Produk tidak ditemukan', 'danger')
+        return redirect(url_for('main.index'))
+    
+    # Ambil data builder steps dari database
+    builder_steps = product.builder_steps.order_by(BuilderStep.step_order).filter_by(is_active=True).all()
+    
+    # Jika produk menggunakan struktur builder dinamis
+    if builder_steps:
+        # Implementasi builder dinamis
+        return render_template('builder_dynamic.html', 
+                              product=product,
+                              product_id=product_id,
+                              builder_steps=builder_steps)
+    
+    # Fallback ke builder statis lama jika belum ada struktur dinamis
+    # Ambil aset untuk builder
+    base_path = f"app/static/assets/{product_id}"
+    
+    rings = list_assets_clean(f"{base_path}/landscape/rings")
+    tabs = list_assets_clean(f"{base_path}/portrait/tabs") or list_assets_clean(f"{base_path}/landscape/tabs")
+    
+    weekly_layouts = list_layouts_clean(f"{base_path}/portrait/weekly", ["weekly_"]) or \
+                    list_layouts_clean(f"{base_path}/landscape/weekly", ["weekly_"])
+                    
+    daily_layouts = list_layouts_clean(f"{base_path}/portrait/daily", ["daily_"]) or \
+                   list_layouts_clean(f"{base_path}/landscape/daily", ["daily_"])
+    
+    return render_template('builder.html', 
+                          product_id=product_id,
+                          rings=rings,
+                          tabs=tabs,
+                          weekly_layouts=weekly_layouts,
+                          daily_layouts=daily_layouts)
 
 @main.route('/build', methods=['POST'])
 def build():
-    if not session.get('access_granted'):
-        return jsonify({'error': 'Unauthorized'}), 401
-
-    data = request.get_json()
-    access_code = session.get('access_code')
-    product_id = get_product_id_from_code(access_code)
-
-    if not product_id:
-        return jsonify({'error': 'Invalid product ID'}), 400
-
-    orientation = data.get('orientation', 'portrait')
-    session['orientation'] = orientation
-
-    ring = data.get('ring', '')
-    tab = data.get('tab', 'neutral')
-    weekly = data.get('weekly_layout', 'horizontal')
-    daily = data.get('daily_layout') or 'none'
-    start_day = data.get('start_day', 'monday')
-
-    filename = f"{product_id}-{orientation}-{ring}-{tab}-{weekly}-{daily}-{start_day}.pdf"
-    output_path = os.path.join('static', 'pdfs', filename)
-    os.makedirs('static/pdfs', exist_ok=True)
-
-    generate_planner_pdf({
-        'product_id': product_id,
-        'orientation': orientation,
-        'ring': ring,
-        'tab': tab,
-        'weekly_layout': weekly,
-        'daily_layout': daily,
-        'start_day': start_day
-    }, output_path)
-
-    # Generate PNG preview dari PDF
-    preview_name = filename.replace('.pdf', '.png')
-    preview_path = os.path.join('static', 'previews', preview_name)
-    os.makedirs('static/previews', exist_ok=True)
-    generate_preview(output_path, preview_path)
-
-    # Update status kode akses + log download
-    code_obj = AccessCode.query.filter_by(code=access_code).first()
-    if code_obj and code_obj.status != 'used':
-        code_obj.status = 'used'
-        code_obj.used_at = datetime.utcnow()
-        db.session.commit()
-
-        log = DownloadLog(
+    data = request.json
+    
+    # Validasi data
+    required_fields = ['orientation', 'tab', 'weekly_layout', 'start_day', 'product_id']
+    for field in required_fields:
+        if field not in data or not data[field]:
+            return jsonify({'error': f'Field {field} is required'}), 400
+    
+    # Buat nama file unik
+    unique_id = uuid.uuid4().hex[:8]
+    timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+    filename = f"{data['product_id']}-{unique_id}-{timestamp}.pdf"
+    output_path = os.path.join('app/static/pdfs', filename)
+    
+    # Generate PDF
+    try:
+        generate_planner_pdf({
+            'product_id': data['product_id'],
+            'orientation': data['orientation'],
+            'ring': data.get('ring', ''),
+            'tab': data['tab'],
+            'weekly_layout': data['weekly_layout'],
+            'daily_layout': data.get('daily_layout', ''),
+            'start_day': data['start_day']
+        }, output_path)
+        
+        # Jika user login, simpan planner ke database
+        if current_user.is_authenticated:
+            new_planner = GeneratedPlanner(
+                user_id=current_user.id,
+                product_id=data['product_id'],
+                orientation=data['orientation'],
+                ring=data.get('ring', ''),
+                tab=data['tab'],
+                weekly_layout=data['weekly_layout'],
+                daily_layout=data.get('daily_layout', ''),
+                start_day=data['start_day'],
+                pdf_filename=filename
+            )
+            db.session.add(new_planner)
+            db.session.commit()
+        
+        # Simpan ke session untuk user yang tidak login
+        else:
+            session['generated_pdf'] = filename
+        
+        # Catat log unduhan
+        user_email = current_user.email if current_user.is_authenticated else "guest"
+        access_code = session.get('access_code')
+        
+        download_log = DownloadLog(
             access_code=access_code,
-            product_id=product_id,
-            user_email="-"
+            product_id=data['product_id'],
+            user_id=current_user.id if current_user.is_authenticated else None,
+            user_email=user_email
         )
-        db.session.add(log)
+        db.session.add(download_log)
         db.session.commit()
-
-    return jsonify({'filename': filename})
+        
+        return jsonify({'filename': filename})
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @main.route('/download/<filename>')
 def download_file(filename):

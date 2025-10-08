@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}My Planners - Loot Pixel{% endblock %}
+
+{% block content %}
+<div class="planners-container">
+  <h1>My Planners</h1>
+  
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+  
+  <div class="back-link">
+    <a href="{{ url_for('user.dashboard') }}">← Back to Dashboard</a>
+  </div>
+  
+  {% if planners %}
+    <div class="planner-grid">
+      {% for planner in planners %}
+        <div class="planner-card">
+          <div class="planner-header">
+            <h3>Planner #{{ planner.id }}</h3>
+            <span class="planner-date">{{ planner.created_at.strftime('%Y-%m-%d') }}</span>
+          </div>
+          
+          <div class="planner-details">
+            <div class="detail-item">
+              <span class="detail-label">Orientation:</span>
+              <span class="detail-value">{{ planner.orientation|capitalize }}</span>
+            </div>
+            
+            <div class="detail-item">
+              <span class="detail-label">Tab Color:</span>
+              <span class="detail-value">{{ planner.tab|capitalize }}</span>
+            </div>
+            
+            {% if planner.ring %}
+              <div class="detail-item">
+                <span class="detail-label">Ring Color:</span>
+                <span class="detail-value">{{ planner.ring|capitalize }}</span>
+              </div>
+            {% endif %}
+            
+            <div class="detail-item">
+              <span class="detail-label">Weekly Layout:</span>
+              <span class="detail-value">{{ planner.weekly_layout|capitalize }}</span>
+            </div>
+            
+            {% if planner.daily_layout %}
+              <div class="detail-item">
+                <span class="detail-label">Daily Layout:</span>
+                <span class="detail-value">{{ planner.daily_layout|capitalize }}</span>
+              </div>
+            {% endif %}
+            
+            <div class="detail-item">
+              <span class="detail-label">Week Starts On:</span>
+              <span class="detail-value">{{ planner.start_day|capitalize }}</span>
+            </div>
+            
+            <div class="detail-item">
+              <span class="detail-label">Last Downloaded:</span>
+              <span class="detail-value">
+                {% if planner.last_accessed %}
+                  {{ planner.last_accessed.strftime('%Y-%m-%d %H:%M') }}
+                {% else %}
+                  Never
+                {% endif %}
+              </span>
+            </div>
+          </div>
+          
+          <div class="planner-actions">
+            <a href="{{ url_for('user.download_planner', planner_id=planner.id) }}" class="btn">Download PDF</a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <p>You haven't created any planners yet.</p>
+      <a href="{{ url_for('user.dashboard') }}" class="btn">Go to Dashboard</a>
+    </div>
+  {% endif %}
+</div>
+
+<style>
+  .planners-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+  
+  .back-link {
+    margin-bottom: 2rem;
+  }
+  
+  .back-link a {
+    color: var(--primary);
+    text-decoration: none;
+  }
+  
+  .back-link a:hover {
+    text-decoration: underline;
+  }
+  
+  .planner-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 2rem;
+  }
+  
+  .planner-card {
+    background: var(--bg-card);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-glow);
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  
+  .planner-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
+  }
+  
+  .planner-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--glass-border);
+  }
+  
+  .planner-date {
+    background: var(--bg-glass);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+  }
+  
+  .planner-details {
+    margin-bottom: 1.5rem;
+  }
+  
+  .detail-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  .detail-label {
+    color: var(--text-secondary);
+  }
+  
+  .detail-value {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+  
+  .planner-actions {
+    text-align: center;
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 5rem;
+    background: var(--bg-card);
+    border-radius: var(--border-radius);
+    color: var(--text-secondary);
+  }
+  
+  .alert {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: var(--border-radius-sm);
+  }
+  
+  .alert-success {
+    background: rgba(0, 255, 136, 0.1);
+    border: 1px solid var(--success);
+  }
+  
+  .alert-danger {
+    background: rgba(255, 71, 87, 0.1);
+    border: 1px solid var(--error-color);
+  }
+  
+  .alert-warning {
+    background: rgba(255, 184, 0, 0.1);
+    border: 1px solid var(--warning);
+  }
+  
+  .alert-info {
+    background: rgba(4, 247, 255, 0.1);
+    border: 1px solid var(--primary);
+  }
+</style>
+{% endblock %}

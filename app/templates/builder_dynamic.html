@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Build Your Planner - Loot Pixel{% endblock %}
+
+{% block content %}
+<div class="builder-container">
+  <h1>Personalize Your Digital Planner</h1>
+  
+  <form id="builder-form" onsubmit="submitBuild(event)">
+    {% for step in builder_steps %}
+      <div class="step" id="step-{{ step.step_order }}" data-step-name="{{ step.step_name }}">
+        <label>{{ step.display_header }}</label>
+        
+        <select id="{{ step.step_name }}" {% if step.step_name != 'daily_layout' %}required{% endif %} onchange="updatePreview()">
+          <option value="">-- Select {{ step.display_header.split(':')[1] | trim }} --</option>
+          
+          <!-- Opsi akan diisi secara dinamis via JavaScript -->
+        </select>
+        
+        <div class="error-message" id="{{ step.step_name }}-error">Please select an option</div>
+        
+        <div class="step-navigation">
+          {% if not loop.first %}
+            <button type="button" onclick="prevStep()">Back</button>

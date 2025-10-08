@@ -1,39 +1,153 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Loot Pixel{% endblock %}</title>
-
-  <!-- FUTURISTIC CSS -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/futuristic.css') }}">
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
   {% block extra_css %}{% endblock %}
 </head>
 <body>
-
-  <header>
-    <h1>Loot Pixel</h1>
-  </header>
-
+  <nav class="navbar">
+    <div class="navbar-container">
+      <a href="{{ url_for('main.index') }}" class="navbar-logo">Loot Pixel</a>
+      
+      <div class="navbar-links">
+        <a href="{{ url_for('main.index') }}">Home</a>
+        
+        {% if current_user.is_authenticated %}
+          <a href="{{ url_for('user.dashboard') }}">Dashboard</a>
+          <a href="{{ url_for('user.my_planners') }}">My Planners</a>
+          <a href="{{ url_for('user.logout') }}" class="btn-outline">Logout</a>
+        {% else %}
+          <a href="{{ url_for('main.access') }}">Access Code</a>
+          <a href="{{ url_for('user.login') }}">Login</a>
+          <a href="{{ url_for('user.register') }}" class="btn-outline">Register</a>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+  
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-messages">
+        {% for category, message in messages %}
+          <div class="flash-message {{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+  
   <main>
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <div class="alert alert-error">
-          {% for message in messages %}
-            <p>{{ message }}</p>
-          {% endfor %}
-        </div>
-      {% endif %}
-    {% endwith %}
-
     {% block content %}{% endblock %}
   </main>
-
+  
   <footer>
-    <p>&copy; {{ current_year }} Loot Pixel — Powered by Rasya</p>
+    <div class="footer-container">
+      <p>&copy; {{ current_year }} Loot Pixel. All rights reserved.</p>
+    </div>
   </footer>
-
+  
+  <style>
+    .navbar {
+      background: var(--bg-darker);
+      padding: 1rem 0;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    .navbar-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .navbar-logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 700;
+    }
+    
+    .navbar-links {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+    
+    .navbar-links a {
+      color: var(--text-primary);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    
+    .navbar-links a:hover {
+      color: var(--primary);
+    }
+    
+    .btn-outline {
+      border: 1px solid var(--primary);
+      padding: 0.5rem 1rem;
+      border-radius: var(--border-radius-sm);
+      transition: background 0.3s, color 0.3s;
+    }
+    
+    .btn-outline:hover {
+      background: var(--primary);
+      color: var(--bg-darker) !important;
+    }
+    
+    .flash-messages {
+      max-width: 1200px;
+      margin: 1rem auto;
+      padding: 0 2rem;
+    }
+    
+    .flash-message {
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: var(--border-radius-sm);
+    }
+    
+    .flash-message.success {
+      background: rgba(0, 255, 136, 0.1);
+      border: 1px solid var(--success);
+    }
+    
+    .flash-message.danger {
+      background: rgba(255, 71, 87, 0.1);
+      border: 1px solid var(--error-color);
+    }
+    
+    .flash-message.warning {
+      background: rgba(255, 184, 0, 0.1);
+      border: 1px solid var(--warning);
+    }
+    
+    .flash-message.info {
+      background: rgba(4, 247, 255, 0.1);
+      border: 1px solid var(--primary);
+    }
+    
+    footer {
+      background: var(--bg-darker);
+      padding: 2rem 0;
+      margin-top: 4rem;
+    }
+    
+    .footer-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      text-align: center;
+      color: var(--text-secondary);
+    }
+  </style>
+  
+  {% block scripts %}{% endblock %}
 </body>
 </html>

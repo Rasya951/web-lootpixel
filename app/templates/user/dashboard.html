@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Loot Pixel{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h1>Welcome, {{ current_user.username }}!</h1>
+  
+  <div class="row mt-4">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h5>Your Products</h5>
+        </div>
+        <div class="card-body">
+          {% if products %}
+            <ul class="list-group">
+              {% for product in products %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  {{ product.name }}
+                  <a href="{{ url_for('main.builder', product_id=product.product_id) }}" class="btn btn-sm btn-primary">Build Planner</a>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p>You don't have any products yet.</p>
+          {% endif %}
+          
+          <form method="POST" action="{{ url_for('user.add_product') }}" class="mt-3">
+            <div class="input-group">
+              <input type="text" class="form-control" name="access_code" placeholder="Enter access code">
+              <div class="input-group-append">
+                <button type="submit" class="btn btn-success">Add Product</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h5>Saved Planners</h5>
+        </div>
+        <div class="card-body">
+          {% if saved_planners %}
+            <ul class="list-group">
+              {% for planner in saved_planners %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  {{ planner.name }}
+                  <div>
+                    <a href="{{ url_for('main.builder', planner_id=planner.id) }}" class="btn btn-sm btn-primary">Edit</a>
+                    <form method="POST" action="{{ url_for('user.delete_planner', planner_id=planner.id) }}" class="d-inline">
+                      <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
+                    </form>
+                  </div>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p>You haven't saved any planners yet.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

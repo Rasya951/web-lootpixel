@@ -15,6 +15,58 @@ class Product(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 # ========================
+# Tabel relasi User-Product (untuk akses permanen)
+# ========================
+user_products = db.Table('user_products',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
+    db.Column('product_id', db.Integer, db.ForeignKey('product.id'), primary_key=True),
+    db.Column('created_at', db.DateTime, default=datetime.utcnow)
+)
+
+# ========================
+# User (untuk akun pengguna)
+# ========================
+class User(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    password_hash = db.Column(db.String(128), nullable=False)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    last_login = db.Column(db.DateTime, nullable=True)
+    
+    # Relasi dengan Product (many-to-many)
+    products = db.relationship('Product', secondary=user_products, lazy='subquery',
+                               backref=db.backref('users', lazy=True))
+    
+    # Relasi dengan SavedPlanner (one-to-many)
+    saved_planners = db.relationship('SavedPlanner', backref='user', lazy=True)
+    
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password, method='pbkdf2:sha256')
+        
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+# ========================
+# SavedPlanner (untuk menyimpan konfigurasi planner)
+# ========================
+class SavedPlanner(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    product_id = db.Column(db.Integer, nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    orientation = db.Column(db.String(20), nullable=False)
+    ring = db.Column(db.String(50), nullable=True)
+    tab = db.Column(db.String(50), nullable=False)
+    weekly_layout = db.Column(db.String(50), nullable=False)
+    daily_layout = db.Column(db.String(50), nullable=True)
+    start_day = db.Column(db.String(20), nullable=False)
+    pdf_filename = db.Column(db.String(200), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+# ========================
 # Kode Akses
 # ========================
 class AccessCode(db.Model):
@@ -24,6 +76,7 @@ class AccessCode(db.Model):
     status = db.Column(db.String(20), default='not used')            # 'not used' / 'used'
     user_email = db.Column(db.String(100), nullable=True)
     used_at = db.Column(db.DateTime, nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)  # Relasi dengan User
 
 # ========================
 # Log Unduhan
@@ -33,6 +86,10 @@ class DownloadLog(db.Model):
     access_code = db.Column(db.String(50), nullable=False)
     product_id = db.Column(db.Integer, nullable=False)
     user_email = db.Column(db.String(100), nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)  # Relasi dengan User
+    user_email = db.Column(db.String(100), nullable=False)
+    planner_id = db.Column(db.Integer, db.ForeignKey('generated_planner.id'), nullable=True)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 # ========================

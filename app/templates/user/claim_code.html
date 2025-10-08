@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Claim Access Code - Loot Pixel{% endblock %}
+
+{% block content %}
+<div class="claim-container">
+  <h2>Claim Access Code</h2>
+  
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+  
+  <form method="POST" action="{{ url_for('user.claim_code') }}">
+    <div class="form-group">
+      <label for="access_code">Enter your access code</label>
+      <input type="text" id="access_code" name="access_code" required placeholder="e.g., 1-ABCD12">
+    </div>
+    
+    <button type="submit" class="btn">Claim Code</button>
+  </form>
+  
+  <div class="info-box">
+    <h3>Where to find your access code?</h3>
+    <p>If you purchased a planner from our Etsy shop, you should have received an email with your access code.</p>
+    <p>The code format is typically: [number]-[letters and numbers], for example: 1-ABCD12</p>
+  </div>
+</div>
+
+<style>
+  .claim-container {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: var(--bg-card);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-glow);
+  }
+  
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+  }
+  
+  .form-group input {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--bg-glass);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--border-radius-sm);
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    text-align: center;
+    letter-spacing: 1px;
+  }
+  
+  .info-box {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: rgba(4, 247, 255, 0.05);
+    border: 1px solid rgba(4, 247, 255, 0.2);
+    border-radius: var(--border-radius-sm);
+  }
+  
+  .info-box h3 {
+    margin-top: 0;
+    color: var(--primary);
+  }
+  
+  .alert {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: var(--border-radius-sm);
+  }
+  
+  .alert-success {
+    background: rgba(0, 255, 136, 0.1);
+    border: 1px solid var(--success);
+  }
+  
+  .alert-danger {
+    background: rgba(255, 71, 87, 0.1);
+    border: 1px solid var(--error-color);
+  }
+  
+  .alert-warning {
+    background: rgba(255, 184, 0, 0.1);
+    border: 1px solid var(--warning);
+  }
+  
+  .alert-info {
+    background: rgba(4, 247, 255, 0.1);
+    border: 1px solid var(--primary);
+  }
+</style>
+{% endblock %}

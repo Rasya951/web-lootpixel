@@ -33,18 +33,23 @@ def create_app():
     login_manager.login_view = 'auth.login'
 
     # Load user untuk Flask-Login
-    from .models import AdminUser
+    from .models import AdminUser, User
     @login_manager.user_loader
     def load_user(user_id):
-        return AdminUser.query.get(int(user_id))
+        # Cek apakah ini admin atau user biasa
+        if session.get('admin_logged_in'):
+            return AdminUser.query.get(int(user_id))
+        return User.query.get(int(user_id))
 
     # Register Blueprints
     from .routes import main
     from .admin_routes import admin
     from .auth_routes import auth
+    from .user_routes import user
     app.register_blueprint(main)
     app.register_blueprint(admin, url_prefix='/admin')
     app.register_blueprint(auth)
+    app.register_blueprint(user, url_prefix='/user')
 
     # Inject current_year ke semua template
     @app.context_processor
