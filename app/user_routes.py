@@ -105,6 +105,14 @@ def dashboard():
                           saved_planners=saved_planners)
 
 @user.route('/add-product', methods=['POST'])
+@user.route('/my-planners')
+@login_required
+def my_planners():
+    # Ambil semua planner yang pernah di-generate oleh user yang sedang login
+    # (Asumsi Anda punya model GeneratedPlanner yang terhubung ke user)
+    planners = GeneratedPlanner.query.filter_by(user_id=current_user.id).order_by(GeneratedPlanner.created_at.desc()).all()
+
+    return render_template('user/my_planners.html', planners=planners)
 @login_required
 def add_product():
     access_code = request.form.get('access_code', '').strip()

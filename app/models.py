@@ -170,3 +170,19 @@ class LayoutHyperlink(db.Model):
     height = db.Column(db.Float, nullable=False)
     destination = db.Column(db.String(200), nullable=False)      # Bisa angka atau label halaman
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+# ========================
+# Generated Planner (untuk menyimpan hasil build user non-login)
+# ========================
+class GeneratedPlanner(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+    orientation = db.Column(db.String(20))
+    ring = db.Column(db.String(50))
+    tab = db.Column(db.String(50))
+    weekly_layout = db.Column(db.String(50))
+    daily_layout = db.Column(db.String(50))
+    start_day = db.Column(db.String(20))
+    pdf_filename = db.Column(db.String(255))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)

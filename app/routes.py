@@ -173,20 +173,9 @@ def builder(product_id):
     if not product:
         flash('Produk tidak ditemukan', 'danger')
         return redirect(url_for('main.index'))
-    
-    # Ambil data builder steps dari database
-    builder_steps = product.builder_steps.order_by(BuilderStep.step_order).filter_by(is_active=True).all()
-    
-    # Jika produk menggunakan struktur builder dinamis
-    if builder_steps:
-        # Implementasi builder dinamis
-        return render_template('builder_dynamic.html', 
-                              product=product,
-                              product_id=product_id,
-                              builder_steps=builder_steps)
-    
-    # Fallback ke builder statis lama jika belum ada struktur dinamis
-    # Ambil aset untuk builder
+
+    # (BAGIAN YANG DIPERBAIKI)
+    # Langsung gunakan builder statis berbasis file aset
     base_path = f"app/static/assets/{product_id}"
     
     rings = list_assets_clean(f"{base_path}/landscape/rings")
@@ -204,7 +193,6 @@ def builder(product_id):
                           tabs=tabs,
                           weekly_layouts=weekly_layouts,
                           daily_layouts=daily_layouts)
-
 @main.route('/build', methods=['POST'])
 def build():
     data = request.json
